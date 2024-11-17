@@ -122,4 +122,10 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     public void setPocetValidnychZaznamov(int pocetValidnychZaznamov) {
         this.pocetValidnychZaznamov = pocetValidnychZaznamov;
     }
+
+    public void vypisObsah() {
+        for (IZaznam<T> z : zaznamy) {
+            System.out.println(z);
+        }
+    }
 }

@@ -43,14 +43,21 @@ public class HaldovySubor<T extends IZaznam<T>> {
 }
 
     public T getZaznam(T zaznam, int blok) {
-        return null;
+        Blok<T> najdenyBlok = getBlok(blok);
+        return najdenyBlok.getZaznam(zaznam);
     }
 
     public void zmazZaznam(T zaznam, int blok) {
-
+        Blok<T> najdenyBlok = getBlok(blok);
+        najdenyBlok.zmazZaznam(zaznam);
     }
 
     public void vypisObsah() {
-
+        int indexBloku = uplnePrazdnyBlok;
+        while (indexBloku != -1) {
+            Blok<T> blok = getBlok(indexBloku);
+            blok.vypisObsah();
+            indexBloku = blok.getDalsiVolnyIndex();
+        }
     }
 }
