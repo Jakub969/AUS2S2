@@ -89,7 +89,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
     }
 
-    public void zmazZaznam(IZaznam<T> zaznam) {
+    public void zmazZaznam(T zaznam) {
         for (IZaznam<T> z : zaznamy) {
             if (z.rovnaSa(zaznam)) {
                 zaznamy.remove(z);
