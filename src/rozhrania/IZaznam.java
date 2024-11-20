@@ -1,3 +1,5 @@
+package rozhrania;
+
 public interface IZaznam<T> extends IByteOperacie {
     boolean rovnaSa(T objekt);
     T vytvorKopiu();

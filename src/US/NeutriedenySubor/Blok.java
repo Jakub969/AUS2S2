@@ -1,3 +1,8 @@
+package US.NeutriedenySubor;
+
+import rozhrania.IByteOperacie;
+import rozhrania.IZaznam;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -67,7 +72,10 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
 
     @Override
     public int getSize() {
-        int velkostZaznamu = zaznamy.getFirst().getSize();
+        int velkostZaznamu = 0;
+        if (!zaznamy.isEmpty()) {
+            velkostZaznamu = zaznamy.getFirst().getSize();
+        }
         return Integer.BYTES + Integer.BYTES + Integer.BYTES + (velkostZaznamu * pocetZaznamov);
     }
 
@@ -85,7 +93,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
         zaznamy.add(zaznam);
         pocetValidnychZaznamov++;
     } else {
-        throw new IllegalStateException("Blok je plný.");
+        throw new IllegalStateException("US.NeutriedenySubor.Blok je plný.");
     }
     }
 

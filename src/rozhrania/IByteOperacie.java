@@ -1,3 +1,5 @@
+package rozhrania;
+
 public interface IByteOperacie {
     void fromByteArray(byte[] poleBytov);
     byte[] toByteArray();
