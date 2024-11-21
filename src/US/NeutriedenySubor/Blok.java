@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     private int pocetValidnychZaznamov;
     private ArrayList<IZaznam<T>> zaznamy;
@@ -20,6 +19,9 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     public Blok(int blokovaciFaktor) {
         this.zaznamy = new ArrayList<>(blokovaciFaktor);
         this.pocetZaznamov = blokovaciFaktor;
+        this.dalsiVolnyIndex = -1;
+        this.predchadzajuciVolnyIndex = -1;
+        this.pocetValidnychZaznamov = 0;
     }
 
     @Override
@@ -31,7 +33,10 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             this.pocetValidnychZaznamov = hlpInStream.readInt();
             this.dalsiVolnyIndex = hlpInStream.readInt();
             this.predchadzajuciVolnyIndex = hlpInStream.readInt();
-            int velkostZaznamu = zaznamy.getFirst().getSize();
+            int velkostZaznamu = 0;
+            if (!zaznamy.isEmpty()) {
+                velkostZaznamu = zaznamy.getFirst().getSize();
+            }
             int offset = Integer.BYTES + Integer.BYTES + Integer.BYTES;
             for (int i = 0; i < pocetZaznamov; i++) {
                 byte[] zaznamBytes = new byte[velkostZaznamu];
@@ -98,12 +103,21 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
 
     public void zmazZaznam(T zaznam) {
-        for (IZaznam<T> z : zaznamy) {
-            if (z.rovnaSa(zaznam)) {
-                zaznamy.remove(z);
-                pocetValidnychZaznamov--;
-                return;
+        int indexZaznamu = -1;
+        for (int i = 0; i < zaznamy.size(); i++) {
+            if (zaznamy.get(i).rovnaSa(zaznam)) {
+                indexZaznamu = i;
+                break;
             }
+        }
+        if (indexZaznamu != -1) {
+            if (indexZaznamu != pocetValidnychZaznamov - 1) {
+                IZaznam<T> docasnyZaznam = zaznamy.get(indexZaznamu);
+                zaznamy.set(indexZaznamu, zaznamy.get(pocetValidnychZaznamov - 1));
+                zaznamy.set(pocetValidnychZaznamov - 1, docasnyZaznam);
+            }
+            IZaznam<T> zmazanyZaznam = zaznamy.remove(pocetValidnychZaznamov - 1);
+            pocetValidnychZaznamov--;
         }
     }
 

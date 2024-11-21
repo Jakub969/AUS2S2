@@ -34,26 +34,31 @@ public class HaldovySubor<T extends IZaznam<T>> {
     }
 
     private Blok<T> getBlok(int indexBloku) {
-        File file = new File(nazovSuboru);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new IllegalStateException("Chyba pri vytváraní súboru.", e);
-            }
-        }
+    File file = new File(nazovSuboru);
+    int blokSize = new Blok<>(pocetZaznamov).getSize();
+    long offset = indexBloku * (long) blokSize;
 
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            long offset = indexBloku * (long) new Blok<>(pocetZaznamov).getSize();
-            byte[] blokBytes = new byte[new Blok<>(pocetZaznamov).getSize()];
-            raf.seek(offset);
-            raf.readFully(blokBytes);
-            Blok<T> blok = new Blok<>(pocetZaznamov);
-            blok.fromByteArray(blokBytes);
-            return blok;
+    if (!file.exists()) {
+        try {
+            file.createNewFile();
         } catch (IOException e) {
-            throw new IllegalStateException("Chyba pri načítaní bloku.", e);
+            throw new IllegalStateException("Chyba pri vytváraní súboru.", e);
         }
+    }
+
+    try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+        if (raf.length() < offset + blokSize) {
+            raf.setLength(offset + blokSize);
+        }
+        byte[] blokBytes = new byte[blokSize];
+        raf.seek(offset);
+        raf.readFully(blokBytes);
+        Blok<T> blok = new Blok<>(pocetZaznamov);
+        blok.fromByteArray(blokBytes);
+        return blok;
+    } catch (IOException e) {
+        throw new IllegalStateException("Chyba pri načítaní bloku.", e);
+    }
 }
 
     public T getZaznam(T zaznam, int blok) {
