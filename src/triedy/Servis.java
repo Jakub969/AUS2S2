@@ -27,6 +27,13 @@ public class Servis implements IZaznam<Servis> {
         this.id = id;
     }
 
+    public Servis() {
+        this.datum = new Date();
+        this.cena = 0.0;
+        this.popis = new char[MAX_VELKOST_POPISU];
+        this.id = 0;
+    }
+
     @Override
     public boolean rovnaSa(Servis objekt) {
         return this.id == objekt.id;
@@ -75,5 +82,15 @@ public class Servis implements IZaznam<Servis> {
     @Override
     public int getSize() {
         return Long.BYTES + Double.BYTES + MAX_VELKOST_POPISU + Integer.BYTES;
+    }
+
+    @Override
+    public String toString() {
+        return "Servis{" +
+                "datum=" + datum +
+                ", cena=" + cena +
+                ", popis=" + Arrays.toString(popis) +
+                ", id=" + id +
+                '}';
     }
 }

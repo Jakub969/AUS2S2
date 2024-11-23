@@ -10,15 +10,15 @@ public class HaldovySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
     private int ciastocnePrazdnyBlok;
     private int pocetZaznamov;
-    private Class<T> typZaznamu;
-    private String nazovSuboru;
+    private Blok<T> aktualnyBlok;
     private File subor;
 
     public HaldovySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
         this.pocetZaznamov = blokovaciFaktor;
-        this.typZaznamu = typZaznamu;
-        this.nazovSuboru = nazovSuboru;
         this.subor = new File(nazovSuboru);
+        this.uplnePrazdnyBlok = 0;
+        this.ciastocnePrazdnyBlok = 0;
+        this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
     }
     public void vlozZaznam(IZaznam<T> zaznam) {
         Blok<T> blok = citajBlok(ciastocnePrazdnyBlok);
@@ -33,6 +33,7 @@ public class HaldovySubor<T extends IZaznam<T>> {
             uplnePrazdnyBlok = ciastocnePrazdnyBlok;
             ciastocnePrazdnyBlok = blok.getDalsiVolnyIndex();
         }
+        zapisBlok(blok, blok.getDalsiVolnyIndex());
     }
 
     public T getZaznam(T zaznam, int blok) {
@@ -55,7 +56,7 @@ public class HaldovySubor<T extends IZaznam<T>> {
     }
 
     private Blok<T> citajBlok(int index) {
-        Blok<T> blok = new Blok<>(pocetZaznamov);
+        Blok<T> blok = aktualnyBlok;
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
             raf.seek((long) index * blok.getSize());
             byte[] blokBytes = new byte[blok.getSize()];

@@ -28,6 +28,13 @@ public class Osoba implements IZaznam<Osoba> {
         this.servisy = new Servis[MAX_VELKOST_SERVISOV];
     }
 
+    public Osoba() {
+        this.meno = new char[MAX_VELKSOT_MENA];
+        this.priezvisko = new char[MAX_VELKOST_PRIEZVISKA];
+        this.id = 0;
+        this.servisy = new Servis[MAX_VELKOST_SERVISOV];
+    }
+
     @Override
     public boolean rovnaSa(Osoba objekt) {
         return this.id == objekt.id;
@@ -73,7 +80,23 @@ public class Osoba implements IZaznam<Osoba> {
 
     @Override
     public int getSize() {
-        int velkostServisu = servisy[0].getSize();
+        int velkostServisu = 0;
+        for (Servis servis : servisy) {
+            if (servis != null) {
+                velkostServisu = servis.getSize();
+                break;
+            }
+        }
         return MAX_VELKSOT_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + (velkostServisu * MAX_VELKOST_SERVISOV);
+    }
+
+    @Override
+    public String toString() {
+        return "Osoba{" +
+                "meno=" + Arrays.toString(meno) +
+                ", priezvisko=" + Arrays.toString(priezvisko) +
+                ", id=" + id +
+                ", servisy=" + Arrays.toString(servisy) +
+                '}';
     }
 }

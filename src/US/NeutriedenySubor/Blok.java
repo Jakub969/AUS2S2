@@ -8,16 +8,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+
 public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     private int pocetValidnychZaznamov;
     private ArrayList<IZaznam<T>> zaznamy;
     private final int maxPocetZaznamov;
     private int dalsiVolnyIndex;
     private int predchadzajuciVolnyIndex;
+    private final Class<T> typZaznamu;
 
-    public Blok(int blokovaciFaktor) {
+    public Blok(int blokovaciFaktor, Class<T> typZaznamu) {
         this.zaznamy = new ArrayList<>(blokovaciFaktor);
+        this.typZaznamu = typZaznamu;
         this.maxPocetZaznamov = blokovaciFaktor;
         this.dalsiVolnyIndex = -1;
         this.predchadzajuciVolnyIndex = -1;
@@ -33,14 +37,11 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             this.pocetValidnychZaznamov = hlpInStream.readInt();
             this.dalsiVolnyIndex = hlpInStream.readInt();
             this.predchadzajuciVolnyIndex = hlpInStream.readInt();
-            int velkostZaznamu = 0;
-            if (!zaznamy.isEmpty()) {
-                velkostZaznamu = zaznamy.getFirst().getSize();
-            }
+            int velkostZaznamu = getVelkostZaznamu();
             int offset = Integer.BYTES + Integer.BYTES + Integer.BYTES;
             for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 byte[] zaznamBytes = new byte[velkostZaznamu];
-                hlpInStream.read(zaznamBytes, offset, velkostZaznamu);
+                hlpInStream.read(zaznamBytes, 0, velkostZaznamu);
                 IZaznam<T> zaznam = zaznamy.get(i);
                 zaznam.fromByteArray(zaznamBytes);
                 offset += velkostZaznamu;
@@ -60,12 +61,12 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             hlpOutStream.writeInt(this.pocetValidnychZaznamov);
             hlpOutStream.writeInt(this.dalsiVolnyIndex);
             hlpOutStream.writeInt(this.predchadzajuciVolnyIndex);
-            int velkostZaznamu = zaznamy.getFirst().getSize();
+            int velkostZaznamu = getVelkostZaznamu();
             int offset = Integer.BYTES + Integer.BYTES + Integer.BYTES;
             for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 IZaznam<T> z = zaznamy.get(i);
                 byte[] zaznamBytes = z.toByteArray();
-                hlpOutStream.write(zaznamBytes, offset, zaznamBytes.length);
+                hlpOutStream.write(zaznamBytes, 0, zaznamBytes.length);
                 offset += velkostZaznamu;
             }
             return hlpByteArrayOutputStream.toByteArray();
@@ -78,12 +79,18 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
 
     @Override
     public int getSize() {
-        int velkostZaznamu = 0;
-        if (!zaznamy.isEmpty()) {
-            velkostZaznamu = zaznamy.getFirst().getSize();
-        }
+        int velkostZaznamu = getVelkostZaznamu();
         return Integer.BYTES + Integer.BYTES + Integer.BYTES + (velkostZaznamu * maxPocetZaznamov);
     }
+
+    private int getVelkostZaznamu() {
+    try {
+        T instance = typZaznamu.getDeclaredConstructor().newInstance();
+        return instance.getSize();
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        throw new IllegalStateException("Chyba pri získavaní veľkosti záznamu.", e);
+    }
+}
 
     public T getZaznam(T zaznam) {
         for (IZaznam<T> z : zaznamy) {
@@ -95,12 +102,17 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
 
     public void vlozZaznam(IZaznam<T> zaznam) {
-    if (pocetValidnychZaznamov < maxPocetZaznamov) {
-        zaznamy.add(zaznam);
-        pocetValidnychZaznamov++;
-    } else {
-        throw new IllegalStateException("US.NeutriedenySubor.Blok je plný.");
-    }
+        if (pocetValidnychZaznamov < maxPocetZaznamov) {
+            zaznamy.add(zaznam);
+            pocetValidnychZaznamov++;
+            if (pocetValidnychZaznamov == maxPocetZaznamov) {
+                dalsiVolnyIndex = -1;
+            } else {
+                dalsiVolnyIndex = pocetValidnychZaznamov;
+            }
+        } else {
+            throw new IllegalStateException("US.NeutriedenySubor.Blok je plný.");
+        }
     }
 
     public IZaznam<T> zmazZaznam(T zaznam) {
@@ -150,7 +162,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
 
     public void vypisObsah() {
         for (IZaznam<T> z : zaznamy) {
-            System.out.println(z);
+            System.out.println(z.toString());
         }
     }
 }
