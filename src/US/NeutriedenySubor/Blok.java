@@ -30,6 +30,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
 
     @Override
     public T fromByteArray(byte[] poleBytov) {
+        vyprazdniBlok();
         ByteArrayInputStream hlpByteArrayInputStream = new ByteArrayInputStream(poleBytov);
         DataInputStream hlpInStream = new DataInputStream(hlpByteArrayInputStream);
 
@@ -44,12 +45,20 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
                 hlpInStream.read(zaznamBytes, 0, velkostZaznamu);
                 IZaznam<T> zaznam = typZaznamu.getDeclaredConstructor().newInstance().fromByteArray(zaznamBytes);
                 zaznam.fromByteArray(zaznamBytes);
+                zaznamy.add(zaznam);
                 offset += velkostZaznamu;
             }
             return null;
         } catch (IOException | InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new IllegalStateException("Chyba pri konverzii z byte array.");
         }
+    }
+
+    private void vyprazdniBlok() {
+        this.zaznamy.clear();
+        this.pocetValidnychZaznamov = 0;
+        this.dalsiVolnyIndex = -1;
+        this.predchadzajuciVolnyIndex = -1;
     }
 
     @Override
@@ -73,7 +82,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
 
 
         } catch (IOException e) {
-            throw new IllegalStateException("Chyba pri konverzii do byte array.");
+            throw new IllegalStateException("Chyba pri konverzii z byte array.");
         }
     }
 

@@ -63,10 +63,10 @@ public class HaldovySubor<T extends IZaznam<T>> {
     }
 
     public void vypisObsah() {
-        int indexBloku = uplnePrazdnyBlok;
+        int indexBloku = 0;
         Set<Integer> visitedBlocks = new HashSet<>(); // Track visited blocks to detect cycles
 
-        do {
+        while (indexBloku != -1) {
             if (visitedBlocks.contains(indexBloku)) {
                 System.out.println("Infinite loop detected at block index: " + indexBloku);
                 break;
@@ -78,7 +78,7 @@ public class HaldovySubor<T extends IZaznam<T>> {
             indexBloku = blok.getDalsiVolnyIndex();
 
             System.out.println("Moving to next block index: " + indexBloku); // Debug log
-        } while (indexBloku != -1);
+        }
     }
 
 

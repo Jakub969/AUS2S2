@@ -13,8 +13,8 @@ public class TestHaldovySubor {
         osobaHaldovySubor.vlozZaznam(osoba1);
         osobaHaldovySubor.vlozZaznam(osoba2);
         osobaHaldovySubor.vlozZaznam(osoba3);
-        /*System.out.println("Obsah haldoveho suboru:");
-        osobaHaldovySubor.vypisObsah();*/
+        System.out.println("Obsah haldoveho suboru:");
+        osobaHaldovySubor.vypisObsah();
 
         Osoba hladanaOsoba = osobaHaldovySubor.getZaznam(new Osoba("".toCharArray(), "".toCharArray(), 30), 0);
         System.out.println("Hladana osoba: " + hladanaOsoba);
