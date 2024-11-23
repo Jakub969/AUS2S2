@@ -57,9 +57,9 @@ public class HaldovySubor<T extends IZaznam<T>> {
         return najdenyBlok.getZaznam(zaznam);
     }
 
-    public void zmazZaznam(T zaznam, int blok) {
+    public T zmazZaznam(T zaznam, int blok) {
         Blok<T> najdenyBlok = citajBlok(blok);
-        najdenyBlok.zmazZaznam(zaznam);
+        return najdenyBlok.zmazZaznam(zaznam);
     }
 
     public void vypisObsah() {
@@ -103,4 +103,11 @@ public class HaldovySubor<T extends IZaznam<T>> {
             throw new IllegalStateException("Chyba pri zápise bloku do súboru.", e);
         }
     }
+
+    public void ulozAktualnyBlok() {
+    if (aktualnyBlok != null) {
+        int indexBloku = najdiAdresuPrazdnehoBloku();
+        zapisBlok(aktualnyBlok, indexBloku);
+    }
+}
 }

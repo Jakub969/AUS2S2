@@ -124,7 +124,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
         }
     }
 
-    public IZaznam<T> zmazZaznam(T zaznam) {
+    public T zmazZaznam(T zaznam) {
         int indexZaznamu = -1;
         for (int i = 0; i < zaznamy.size(); i++) {
             if (zaznamy.get(i).rovnaSa(zaznam)) {
@@ -140,7 +140,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             }
             IZaznam<T> zmazanyZaznam = zaznamy.remove(pocetValidnychZaznamov - 1);
             pocetValidnychZaznamov--;
-            return zmazanyZaznam;
+            return zmazanyZaznam.vytvorKopiu();
         }
         return null;
     }

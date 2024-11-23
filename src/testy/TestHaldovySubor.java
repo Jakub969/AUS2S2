@@ -19,8 +19,13 @@ public class TestHaldovySubor {
         Osoba hladanaOsoba = osobaHaldovySubor.getZaznam(new Osoba("".toCharArray(), "".toCharArray(), 30), 0);
         System.out.println("Hladana osoba: " + hladanaOsoba);
 
-        osobaHaldovySubor.zmazZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 0);
+        hladanaOsoba = osobaHaldovySubor.getZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 0);
+        System.out.println("Hladana osoba: " + hladanaOsoba);
+
+        Osoba mazanaOsoba = osobaHaldovySubor.zmazZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 0);
+        System.out.println("Zmazana osoba: " + mazanaOsoba);
         System.out.println("Obsah haldoveho suboru po zmazani:");
         osobaHaldovySubor.vypisObsah();
+        osobaHaldovySubor.ulozAktualnyBlok();
     }
 }
