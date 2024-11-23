@@ -12,13 +12,13 @@ import java.util.ArrayList;
 public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     private int pocetValidnychZaznamov;
     private ArrayList<IZaznam<T>> zaznamy;
-    private int pocetZaznamov;
+    private final int maxPocetZaznamov;
     private int dalsiVolnyIndex;
     private int predchadzajuciVolnyIndex;
 
     public Blok(int blokovaciFaktor) {
         this.zaznamy = new ArrayList<>(blokovaciFaktor);
-        this.pocetZaznamov = blokovaciFaktor;
+        this.maxPocetZaznamov = blokovaciFaktor;
         this.dalsiVolnyIndex = -1;
         this.predchadzajuciVolnyIndex = -1;
         this.pocetValidnychZaznamov = 0;
@@ -38,9 +38,9 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
                 velkostZaznamu = zaznamy.getFirst().getSize();
             }
             int offset = Integer.BYTES + Integer.BYTES + Integer.BYTES;
-            for (int i = 0; i < pocetZaznamov; i++) {
+            for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 byte[] zaznamBytes = new byte[velkostZaznamu];
-                hlpInStream.read(zaznamBytes, 0, velkostZaznamu);
+                hlpInStream.read(zaznamBytes, offset, velkostZaznamu);
                 IZaznam<T> zaznam = zaznamy.get(i);
                 zaznam.fromByteArray(zaznamBytes);
                 offset += velkostZaznamu;
@@ -62,9 +62,10 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             hlpOutStream.writeInt(this.predchadzajuciVolnyIndex);
             int velkostZaznamu = zaznamy.getFirst().getSize();
             int offset = Integer.BYTES + Integer.BYTES + Integer.BYTES;
-            for (IZaznam<T> z : zaznamy) {
+            for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
+                IZaznam<T> z = zaznamy.get(i);
                 byte[] zaznamBytes = z.toByteArray();
-                hlpOutStream.write(zaznamBytes, 0, zaznamBytes.length);
+                hlpOutStream.write(zaznamBytes, offset, zaznamBytes.length);
                 offset += velkostZaznamu;
             }
             return hlpByteArrayOutputStream.toByteArray();
@@ -81,7 +82,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
         if (!zaznamy.isEmpty()) {
             velkostZaznamu = zaznamy.getFirst().getSize();
         }
-        return Integer.BYTES + Integer.BYTES + Integer.BYTES + (velkostZaznamu * pocetZaznamov);
+        return Integer.BYTES + Integer.BYTES + Integer.BYTES + (velkostZaznamu * maxPocetZaznamov);
     }
 
     public T getZaznam(T zaznam) {
@@ -94,7 +95,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
 
     public void vlozZaznam(IZaznam<T> zaznam) {
-    if (pocetValidnychZaznamov < pocetZaznamov) {
+    if (pocetValidnychZaznamov < maxPocetZaznamov) {
         zaznamy.add(zaznam);
         pocetValidnychZaznamov++;
     } else {
@@ -102,7 +103,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
     }
 
-    public void zmazZaznam(T zaznam) {
+    public IZaznam<T> zmazZaznam(T zaznam) {
         int indexZaznamu = -1;
         for (int i = 0; i < zaznamy.size(); i++) {
             if (zaznamy.get(i).rovnaSa(zaznam)) {
@@ -118,7 +119,9 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             }
             IZaznam<T> zmazanyZaznam = zaznamy.remove(pocetValidnychZaznamov - 1);
             pocetValidnychZaznamov--;
+            return zmazanyZaznam;
         }
+        return null;
     }
 
     public int getDalsiVolnyIndex() {

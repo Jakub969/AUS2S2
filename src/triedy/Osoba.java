@@ -3,26 +3,27 @@ package triedy;
 import rozhrania.IZaznam;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class Osoba implements IZaznam<Osoba> {
     private final int MAX_VELKSOT_MENA = 15;
     private final int MAX_VELKOST_PRIEZVISKA = 20;
     private final int MAX_VELKOST_SERVISOV = 5;
 
-    private String meno;
-    private String priezvisko;
+    private char[] meno;
+    private char[] priezvisko;
     private int id;
     private Servis[] servisy;
 
-    public Osoba(String meno, String priezvisko, int id) {
-        if (meno.length() > MAX_VELKSOT_MENA) {
+    public Osoba(char[] meno, char[] priezvisko, int id) {
+        if (meno.length > MAX_VELKSOT_MENA) {
             throw new IllegalArgumentException("Meno môže mať maximálne " + MAX_VELKSOT_MENA + " znakov.");
         }
-        this.meno = meno;
-        if (priezvisko.length() > MAX_VELKOST_PRIEZVISKA) {
+        this.meno = Arrays.copyOf(meno, MAX_VELKSOT_MENA);
+        if (priezvisko.length > MAX_VELKOST_PRIEZVISKA) {
             throw new IllegalArgumentException("Priezvisko môže mať maximálne " + MAX_VELKOST_PRIEZVISKA + " znakov.");
         }
-        this.priezvisko = priezvisko;
+        this.priezvisko = Arrays.copyOf(priezvisko, MAX_VELKOST_PRIEZVISKA);
         this.id = id;
         this.servisy = new Servis[MAX_VELKOST_SERVISOV];
     }
@@ -42,13 +43,13 @@ public class Osoba implements IZaznam<Osoba> {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
-            byte[] menoBytes = new byte[15];
+            byte[] menoBytes = new byte[MAX_VELKSOT_MENA];
             dataInput.readFully(menoBytes);
-            this.meno = new String(menoBytes).trim();
+            this.meno = new String(menoBytes).trim().toCharArray();
 
-            byte[] priezviskoBytes = new byte[20];
+            byte[] priezviskoBytes = new byte[MAX_VELKOST_PRIEZVISKA];
             dataInput.readFully(priezviskoBytes);
-            this.priezvisko = new String(priezviskoBytes).trim();
+            this.priezvisko = new String(priezviskoBytes).trim().toCharArray();
 
             this.id = dataInput.readInt();
         } catch (IOException e) {
@@ -61,8 +62,8 @@ public class Osoba implements IZaznam<Osoba> {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DataOutputStream dataOutput = new DataOutputStream(out);
         try {
-            dataOutput.write(String.format("%-15s", meno).getBytes());
-            dataOutput.write(String.format("%-20s", priezvisko).getBytes());
+            dataOutput.write(String.format("%-" + MAX_VELKSOT_MENA + "s", new String(meno)).getBytes());
+            dataOutput.write(String.format("%-" + MAX_VELKOST_PRIEZVISKA + "s", new String(priezvisko)).getBytes());
             dataOutput.writeInt(id);
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri serializácii záznamu.", e);
@@ -73,6 +74,6 @@ public class Osoba implements IZaznam<Osoba> {
     @Override
     public int getSize() {
         int velkostServisu = servisy[0].getSize();
-        return 15 + 20 + Integer.BYTES + (velkostServisu * MAX_VELKOST_SERVISOV);
+        return MAX_VELKSOT_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + (velkostServisu * MAX_VELKOST_SERVISOV);
     }
 }
