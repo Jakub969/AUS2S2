@@ -24,8 +24,9 @@ public class TestHaldovySubor {
 
         Osoba mazanaOsoba = osobaHaldovySubor.zmazZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 0);
         System.out.println("Zmazana osoba: " + mazanaOsoba);
+        osobaHaldovySubor.ulozAktualnyBlok();
         System.out.println("Obsah haldoveho suboru po zmazani:");
         osobaHaldovySubor.vypisObsah();
-        osobaHaldovySubor.ulozAktualnyBlok();
+
     }
 }

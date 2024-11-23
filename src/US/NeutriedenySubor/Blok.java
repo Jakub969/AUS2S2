@@ -140,6 +140,8 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             }
             IZaznam<T> zmazanyZaznam = zaznamy.remove(pocetValidnychZaznamov - 1);
             pocetValidnychZaznamov--;
+            predchadzajuciVolnyIndex = dalsiVolnyIndex;
+            dalsiVolnyIndex = pocetValidnychZaznamov;
             return zmazanyZaznam.vytvorKopiu();
         }
         return null;
