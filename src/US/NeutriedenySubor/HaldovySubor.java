@@ -5,6 +5,8 @@ import rozhrania.IZaznam;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HaldovySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
@@ -16,16 +18,18 @@ public class HaldovySubor<T extends IZaznam<T>> {
     public HaldovySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
         this.pocetZaznamov = blokovaciFaktor;
         this.subor = new File(nazovSuboru);
-        this.uplnePrazdnyBlok = 0;
-        this.ciastocnePrazdnyBlok = 0;
+        this.uplnePrazdnyBlok = -1;
+        this.ciastocnePrazdnyBlok = -1;
         this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
     }
     public void vlozZaznam(IZaznam<T> zaznam) {
-        Blok<T> blok = citajBlok(ciastocnePrazdnyBlok);
+        int adresabloku = najdiAdresuPrazdnehoBloku();
+
+        Blok<T> blok = citajBlok(adresabloku);
 
         if (blok.getPocetValidnychZaznamov() >= pocetZaznamov) {
             ciastocnePrazdnyBlok = blok.getDalsiVolnyIndex();
-            blok = citajBlok(ciastocnePrazdnyBlok);
+            blok = citajBlok(adresabloku);
         }
         blok.vlozZaznam(zaznam);
 
@@ -33,7 +37,17 @@ public class HaldovySubor<T extends IZaznam<T>> {
             uplnePrazdnyBlok = ciastocnePrazdnyBlok;
             ciastocnePrazdnyBlok = blok.getDalsiVolnyIndex();
         }
-        zapisBlok(blok, blok.getDalsiVolnyIndex());
+        zapisBlok(blok, adresabloku);
+    }
+
+    private int najdiAdresuPrazdnehoBloku() {
+        if (uplnePrazdnyBlok != -1) {
+            return uplnePrazdnyBlok;
+        }
+        if (ciastocnePrazdnyBlok != -1) {
+            return ciastocnePrazdnyBlok;
+        }
+        return (int) subor.length() / aktualnyBlok.getSize();
     }
 
     public T getZaznam(T zaznam, int blok) {
@@ -48,12 +62,23 @@ public class HaldovySubor<T extends IZaznam<T>> {
 
     public void vypisObsah() {
         int indexBloku = uplnePrazdnyBlok;
-        while (indexBloku != -1) {
+        Set<Integer> visitedBlocks = new HashSet<>(); // Track visited blocks to detect cycles
+
+        do {
+            if (visitedBlocks.contains(indexBloku)) {
+                System.out.println("Infinite loop detected at block index: " + indexBloku);
+                break;
+            }
+            visitedBlocks.add(indexBloku);
+
             Blok<T> blok = citajBlok(indexBloku);
             blok.vypisObsah();
             indexBloku = blok.getDalsiVolnyIndex();
-        }
+
+            System.out.println("Moving to next block index: " + indexBloku); // Debug log
+        } while (indexBloku != -1);
     }
+
 
     private Blok<T> citajBlok(int index) {
         Blok<T> blok = aktualnyBlok;
