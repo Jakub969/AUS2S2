@@ -1,7 +1,7 @@
 package rozhrania;
 
-public interface IByteOperacie {
-    void fromByteArray(byte[] poleBytov);
+public interface IByteOperacie<T> {
+    T fromByteArray(byte[] poleBytov);
     byte[] toByteArray();
     int getSize();
 }

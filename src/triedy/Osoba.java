@@ -46,7 +46,7 @@ public class Osoba implements IZaznam<Osoba> {
     }
 
     @Override
-    public void fromByteArray(byte[] poleBytov) {
+    public Osoba fromByteArray(byte[] poleBytov) {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
@@ -59,6 +59,7 @@ public class Osoba implements IZaznam<Osoba> {
             this.priezvisko = new String(priezviskoBytes).trim().toCharArray();
 
             this.id = dataInput.readInt();
+            return this;
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri deserializácii záznamu.", e);
         }

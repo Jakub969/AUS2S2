@@ -47,7 +47,9 @@ public class HaldovySubor<T extends IZaznam<T>> {
         if (ciastocnePrazdnyBlok != -1) {
             return ciastocnePrazdnyBlok;
         }
-        return (int) subor.length() / aktualnyBlok.getSize();
+        int dlzkaSuboru = (int) subor.length();
+        int dlzkaBloku = aktualnyBlok.getSize();
+        return dlzkaSuboru / dlzkaBloku;
     }
 
     public T getZaznam(T zaznam, int blok) {

@@ -45,7 +45,7 @@ public class Servis implements IZaznam<Servis> {
     }
 
     @Override
-    public void fromByteArray(byte[] poleBytov) {
+    public Servis fromByteArray(byte[] poleBytov) {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
@@ -55,6 +55,7 @@ public class Servis implements IZaznam<Servis> {
             dataInput.readFully(popisBytes);
             this.popis = new String(popisBytes).trim().toCharArray();
             this.id = dataInput.readInt();
+            return this;
         } catch (Exception e) {
             throw new IllegalStateException("Chyba pri deserializácii záznamu.", e);
         }

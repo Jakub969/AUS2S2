@@ -29,7 +29,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
     }
 
     @Override
-    public void fromByteArray(byte[] poleBytov) {
+    public T fromByteArray(byte[] poleBytov) {
         ByteArrayInputStream hlpByteArrayInputStream = new ByteArrayInputStream(poleBytov);
         DataInputStream hlpInStream = new DataInputStream(hlpByteArrayInputStream);
 
@@ -42,12 +42,12 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie {
             for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 byte[] zaznamBytes = new byte[velkostZaznamu];
                 hlpInStream.read(zaznamBytes, 0, velkostZaznamu);
-                IZaznam<T> zaznam = zaznamy.get(i);
+                IZaznam<T> zaznam = typZaznamu.getDeclaredConstructor().newInstance().fromByteArray(zaznamBytes);
                 zaznam.fromByteArray(zaznamBytes);
                 offset += velkostZaznamu;
             }
-
-        } catch (IOException e) {
+            return null;
+        } catch (IOException | InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new IllegalStateException("Chyba pri konverzii z byte array.");
         }
     }

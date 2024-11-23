@@ -1,11 +1,11 @@
 package rozhrania;
 
-public interface IZaznam<T> extends IByteOperacie {
+public interface IZaznam<T> extends IByteOperacie<T> {
     boolean rovnaSa(T objekt);
     T vytvorKopiu();
 
     @Override
-    void fromByteArray(byte[] poleBytov);
+    T fromByteArray(byte[] poleBytov);
 
     @Override
     byte[] toByteArray();
