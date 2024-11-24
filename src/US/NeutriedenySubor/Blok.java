@@ -47,7 +47,8 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
                 zaznamy[i] = zaznam;
             }
             return null;
-        } catch (IOException | InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (IOException | InstantiationException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException e) {
             throw new IllegalStateException("Chyba pri konverzii z byte array.");
         }
     }
@@ -88,13 +89,14 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
     }
 
     private int getVelkostZaznamu() {
-    try {
-        T instance = typZaznamu.getDeclaredConstructor().newInstance();
-        return instance.getSize();
-    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-        throw new IllegalStateException("Chyba pri získavaní veľkosti záznamu.", e);
+        try {
+            T instance = typZaznamu.getDeclaredConstructor().newInstance();
+            return instance.getSize();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new IllegalStateException("Chyba pri získavaní veľkosti záznamu.", e);
+        }
     }
-}
 
     public T getZaznam(T zaznam) {
         for (IZaznam<T> z : zaznamy) {
