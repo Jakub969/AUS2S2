@@ -24,7 +24,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
     }
 
-    public void vlozZaznam(IZaznam<T> zaznam) {
+    public int vlozZaznam(IZaznam<T> zaznam) {
         int adresabloku;
 
         if (uplnePrazdnyBlok != -1) {
@@ -51,6 +51,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         }
 
         zapisBlok(aktualnyBlok, adresabloku);
+        return adresabloku;
     }
 
     private int najdiAdresuPrazdnehoBloku() {
@@ -150,9 +151,9 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     }
 
     public void ulozAktualnyBlok() {
-    if (aktualnyBlok != null) {
-        int indexBloku = najdiAdresuPrazdnehoBloku();
-        zapisBlok(aktualnyBlok, indexBloku);
+        if (aktualnyBlok != null) {
+            int indexBloku = najdiAdresuPrazdnehoBloku();
+            zapisBlok(aktualnyBlok, indexBloku);
+        }
     }
-}
 }
