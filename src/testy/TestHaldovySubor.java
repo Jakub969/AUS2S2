@@ -13,7 +13,7 @@ public class TestHaldovySubor {
         osobaNeutriedenySubor.vlozZaznam(osoba1);
         osobaNeutriedenySubor.vlozZaznam(osoba2);
         osobaNeutriedenySubor.vlozZaznam(osoba3);
-        System.out.println("Obsah haldoveho suboru:");
+        System.out.println("Obsah neutrideneho suboru:");
         osobaNeutriedenySubor.vypisObsah();
 
         Osoba hladanaOsoba = osobaNeutriedenySubor.getZaznam(new Osoba("".toCharArray(), "".toCharArray(), 30), 0);
@@ -25,7 +25,7 @@ public class TestHaldovySubor {
         Osoba mazanaOsoba = osobaNeutriedenySubor.zmazZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 1);
         System.out.println("Zmazana osoba: " + mazanaOsoba);
         osobaNeutriedenySubor.ulozAktualnyBlok();
-        System.out.println("Obsah haldoveho suboru po zmazani:");
+        System.out.println("Obsah neutrideneho suboru po zmazani:");
         osobaNeutriedenySubor.vypisObsah();
 
     }

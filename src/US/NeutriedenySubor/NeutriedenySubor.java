@@ -5,8 +5,7 @@ import rozhrania.IZaznam;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 public class NeutriedenySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
@@ -14,12 +13,14 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     private final int pocetZaznamov;
     private Blok<T> aktualnyBlok;
     private final File subor;
+    private final Class<T> typZaznamu;
 
     public NeutriedenySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
         this.pocetZaznamov = blokovaciFaktor;
         this.subor = new File(nazovSuboru);
         this.uplnePrazdnyBlok = -1;
         this.ciastocnePrazdnyBlok = -1;
+        this.typZaznamu = typZaznamu;
         this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
     }
 
@@ -35,6 +36,9 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             aktualnyBlok = citajBlok(adresabloku);
         } else {
             adresabloku = najdiAdresuPrazdnehoBloku();
+        }
+
+        if (aktualnyBlok.getPocetValidnychZaznamov() == pocetZaznamov) {
             aktualnyBlok.vyprazdniBlok();
         }
 
@@ -70,40 +74,49 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         Blok<T> najdenyBlok = citajBlok(blok);
         T zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
         zapisBlok(najdenyBlok, blok);
-        if (najdenyBlok.getPocetValidnychZaznamov() == 0) {
+        int poslednyBlokIndex = (int) (subor.length() / aktualnyBlok.getSize()) - 1;
+        if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
             orezSuborSPrazdnymBlokomNaKonci(blok);
         }
         return zmazanyZaznam;
     }
 
     private void orezSuborSPrazdnymBlokomNaKonci(int blokIndex) {
-        int poslednyBlokIndex = (int) (subor.length() / aktualnyBlok.getSize()) - 1;
+        try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
 
-        if (blokIndex == poslednyBlokIndex) {
-            try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-                raf.setLength((long) blokIndex * aktualnyBlok.getSize());
-            } catch (IOException e) {
-                throw new IllegalStateException("Chyba pri orezávaní súboru.", e);
+            while (blokIndex >= 0) {
+                raf.seek((long) blokIndex * aktualnyBlok.getSize());
+                byte[] blokBytes = new byte[aktualnyBlok.getSize()];
+                raf.read(blokBytes);
+                aktualnyBlok.fromByteArray(blokBytes);
+
+                if (aktualnyBlok.getPocetValidnychZaznamov() > 0) {
+                    break;
+                }
+
+                blokIndex--;
             }
+
+            raf.setLength((long) (blokIndex + 1) * aktualnyBlok.getSize());
+        } catch (IOException e) {
+            throw new IllegalStateException("Chyba pri orezávaní súboru.", e);
         }
     }
 
     public void vypisObsah() {
-        int indexBloku = 0;
-        Set<Integer> visitedBlocks = new HashSet<>(); // Track visited blocks to detect cycles
-
-        while (indexBloku != -1) {
-            if (visitedBlocks.contains(indexBloku)) {
-                System.out.println("Infinite loop detected at block index: " + indexBloku);
-                break;
+        ArrayList<Blok<T>> bloky = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(subor, "r")) {
+            while (raf.getFilePointer() < raf.length()) {
+                byte[] blokBytes = new byte[aktualnyBlok.getSize()];
+                raf.read(blokBytes);
+                Blok<T> blok = new Blok<>(pocetZaznamov, typZaznamu);
+                blok.fromByteArray(blokBytes);
+                bloky.add(blok);
             }
-            visitedBlocks.add(indexBloku);
-
-            Blok<T> blok = citajBlok(indexBloku);
-            blok.vypisObsah();
-            indexBloku = blok.getDalsiVolnyIndex();
-
-            System.out.println("Moving to next block index: " + indexBloku); // Debug log
+            bloky.forEach(Blok::vypisObsah);
+            System.out.println("Počet blokov: " + bloky.size());
+        } catch (IOException e) {
+            throw new IllegalStateException("Chyba pri čítaní blokov zo súboru.", e);
         }
     }
 
