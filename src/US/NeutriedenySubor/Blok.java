@@ -52,7 +52,7 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
         }
     }
 
-    private void vyprazdniBlok() {
+    public void vyprazdniBlok() {
         this.zaznamy.clear();
         this.pocetValidnychZaznamov = 0;
         this.dalsiVolnyIndex = -1;

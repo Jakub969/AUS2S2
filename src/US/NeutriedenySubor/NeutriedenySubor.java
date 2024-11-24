@@ -8,36 +8,45 @@ import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HaldovySubor<T extends IZaznam<T>> {
+public class NeutriedenySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
     private int ciastocnePrazdnyBlok;
-    private int pocetZaznamov;
+    private final int pocetZaznamov;
     private Blok<T> aktualnyBlok;
-    private File subor;
+    private final File subor;
 
-    public HaldovySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
+    public NeutriedenySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
         this.pocetZaznamov = blokovaciFaktor;
         this.subor = new File(nazovSuboru);
         this.uplnePrazdnyBlok = -1;
         this.ciastocnePrazdnyBlok = -1;
         this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
     }
+
     public void vlozZaznam(IZaznam<T> zaznam) {
-        int adresabloku = najdiAdresuPrazdnehoBloku();
+        int adresabloku;
 
-        Blok<T> blok = citajBlok(adresabloku);
-
-        if (blok.getPocetValidnychZaznamov() >= pocetZaznamov) {
-            ciastocnePrazdnyBlok = blok.getDalsiVolnyIndex();
-            blok = citajBlok(adresabloku);
+        if (uplnePrazdnyBlok != -1) {
+            adresabloku = uplnePrazdnyBlok;
+            aktualnyBlok = citajBlok(adresabloku);
+            uplnePrazdnyBlok = -1;
+        } else if (ciastocnePrazdnyBlok != -1) {
+            adresabloku = ciastocnePrazdnyBlok;
+            aktualnyBlok = citajBlok(adresabloku);
+        } else {
+            adresabloku = najdiAdresuPrazdnehoBloku();
+            aktualnyBlok.vyprazdniBlok();
         }
-        blok.vlozZaznam(zaznam);
 
-        if (blok.getPocetValidnychZaznamov() == pocetZaznamov) {
-            uplnePrazdnyBlok = ciastocnePrazdnyBlok;
-            ciastocnePrazdnyBlok = blok.getDalsiVolnyIndex();
+        aktualnyBlok.vlozZaznam(zaznam);
+
+        if (aktualnyBlok.getPocetValidnychZaznamov() == pocetZaznamov) {
+            ciastocnePrazdnyBlok = -1;
+        } else {
+            ciastocnePrazdnyBlok = adresabloku;
         }
-        zapisBlok(blok, adresabloku);
+
+        zapisBlok(aktualnyBlok, adresabloku);
     }
 
     private int najdiAdresuPrazdnehoBloku() {
@@ -105,16 +114,15 @@ public class HaldovySubor<T extends IZaznam<T>> {
     }
 
     private Blok<T> citajBlok(int index) {
-        Blok<T> blok = aktualnyBlok;
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-            raf.seek((long) index * blok.getSize());
-            byte[] blokBytes = new byte[blok.getSize()];
+            raf.seek((long) index * aktualnyBlok.getSize());
+            byte[] blokBytes = new byte[aktualnyBlok.getSize()];
             raf.read(blokBytes);
-            blok.fromByteArray(blokBytes);
+            aktualnyBlok.fromByteArray(blokBytes);
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri čítaní bloku zo súboru.", e);
         }
-        return blok;
+        return aktualnyBlok;
     }
 
     private void zapisBlok(Blok<T> blok, int index) {
