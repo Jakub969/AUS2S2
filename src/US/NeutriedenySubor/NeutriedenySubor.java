@@ -75,9 +75,15 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         Blok<T> najdenyBlok = citajBlok(blok);
         T zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
         zapisBlok(najdenyBlok, blok);
-        int poslednyBlokIndex = (int) subor.length() / aktualnyBlok.getSize();
+        int dlzkaSuboru = (int) subor.length();
+        int dlzkaBloku = aktualnyBlok.getSize();
+        int poslednyBlokIndex = (dlzkaSuboru / dlzkaBloku) - 1;
         if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
             orezSuborSPrazdnymBlokomNaKonci(blok);
+        } else if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok != poslednyBlokIndex) {
+            uplnePrazdnyBlok = blok;
+        } else {
+            ciastocnePrazdnyBlok = blok;
         }
         return zmazanyZaznam;
     }

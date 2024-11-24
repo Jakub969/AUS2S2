@@ -39,13 +39,16 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
         for (int i = 0; i < pocetOperacii; i++) {
             if (random.nextInt() < 0.7) {
                 metodaVkladania();
+                this.neutriedenySubor.vypisObsah();
             } else if (random.nextInt() < 0.15) {
                 if (!bloky.isEmpty()) {
                     metodaMazania();
+                    this.neutriedenySubor.vypisObsah();
                 }
             } else {
                 if (!bloky.isEmpty()) {
                     metodaVyhladavania();
+                    this.neutriedenySubor.vypisObsah();
                 }
             }
         }
@@ -92,6 +95,9 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     private void metodaMazania() {
         int adresa = adresyBlokov.get(random.nextInt(adresyBlokov.size()));
         ArrayList<IZaznam<T>> zaznamy = bloky.get(adresa);
+        if (zaznamy.isEmpty()) {
+            return;
+        }
         IZaznam<T> zaznam = zaznamy.get(random.nextInt(zaznamy.size()));
         neutriedenySubor.zmazZaznam((T) zaznam, adresa);
         zaznamy.remove(zaznam);
@@ -102,6 +108,9 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     private void metodaVyhladavania() {
         int adresa = adresyBlokov.get(random.nextInt(adresyBlokov.size()));
         ArrayList<IZaznam<T>> zaznamy = bloky.get(adresa);
+        if (zaznamy.isEmpty()) {
+            return;
+        }
         IZaznam<T> zaznam = zaznamy.get(random.nextInt(zaznamy.size()));
         neutriedenySubor.getZaznam((T) zaznam, adresa);
         System.out.println("Nájdený záznam: " + zaznam + " v bloku: " + adresa);
