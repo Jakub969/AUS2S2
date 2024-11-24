@@ -59,7 +59,24 @@ public class HaldovySubor<T extends IZaznam<T>> {
 
     public T zmazZaznam(T zaznam, int blok) {
         Blok<T> najdenyBlok = citajBlok(blok);
-        return najdenyBlok.zmazZaznam(zaznam);
+        T zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
+        zapisBlok(najdenyBlok, blok);
+        if (najdenyBlok.getPocetValidnychZaznamov() == 0) {
+            orezSuborSPrazdnymBlokomNaKonci(blok);
+        }
+        return zmazanyZaznam;
+    }
+
+    private void orezSuborSPrazdnymBlokomNaKonci(int blokIndex) {
+        int poslednyBlokIndex = (int) (subor.length() / aktualnyBlok.getSize()) - 1;
+
+        if (blokIndex == poslednyBlokIndex) {
+            try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
+                raf.setLength((long) blokIndex * aktualnyBlok.getSize());
+            } catch (IOException e) {
+                throw new IllegalStateException("Chyba pri orezávaní súboru.", e);
+            }
+        }
     }
 
     public void vypisObsah() {
@@ -81,6 +98,11 @@ public class HaldovySubor<T extends IZaznam<T>> {
         }
     }
 
+    public void vycistiUdaje() {
+        aktualnyBlok = null;
+        uplnePrazdnyBlok = -1;
+        ciastocnePrazdnyBlok = -1;
+    }
 
     private Blok<T> citajBlok(int index) {
         Blok<T> blok = aktualnyBlok;

@@ -81,14 +81,7 @@ public class Osoba implements IZaznam<Osoba> {
 
     @Override
     public int getSize() {
-        int velkostServisu = 0;
-        for (Servis servis : servisy) {
-            if (servis != null) {
-                velkostServisu = servis.getSize();
-                break;
-            }
-        }
-        return MAX_VELKSOT_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + (velkostServisu * MAX_VELKOST_SERVISOV);
+        return MAX_VELKSOT_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + (MAX_VELKOST_SERVISOV * new Servis().getSize());
     }
 
     @Override
