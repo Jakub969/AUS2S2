@@ -24,7 +24,7 @@ public class TestHaldovySubor {
 
         Osoba mazanaOsoba = osobaNeutriedenySubor.zmazZaznam(new Osoba("".toCharArray(), "".toCharArray(), 35), 1);
         System.out.println("Zmazana osoba: " + mazanaOsoba);
-        osobaNeutriedenySubor.ulozAktualnyBlok();
+        //osobaNeutriedenySubor.ulozAktualnyBlok();
         System.out.println("Obsah neutrideneho suboru po zmazani:");
         osobaNeutriedenySubor.vypisObsah();
 

@@ -74,7 +74,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         Blok<T> najdenyBlok = citajBlok(blok);
         T zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
         zapisBlok(najdenyBlok, blok);
-        int poslednyBlokIndex = (int) (subor.length() / aktualnyBlok.getSize()) - 1;
+        int poslednyBlokIndex = (int) subor.length() / aktualnyBlok.getSize();
         if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
             orezSuborSPrazdnymBlokomNaKonci(blok);
         }
@@ -113,8 +113,10 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
                 blok.fromByteArray(blokBytes);
                 bloky.add(blok);
             }
-            bloky.forEach(Blok::vypisObsah);
-            System.out.println("Počet blokov: " + bloky.size());
+            for (int i = 0; i < bloky.size(); i++) {
+                System.out.println("Blok " + i + ":");
+                bloky.get(i).vypisObsah();
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri čítaní blokov zo súboru.", e);
         }
