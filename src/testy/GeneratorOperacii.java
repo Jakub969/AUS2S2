@@ -53,6 +53,7 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
         System.out.println("Počet mazaní: " + pocetMazani);
         System.out.println("Počet vyhľadávaní: " + pocetVyhladavani);
         this.neutriedenySubor.vypisObsah();
+
         System.out.println("Seed: " + seed);
     }
 
