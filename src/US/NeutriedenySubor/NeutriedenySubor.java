@@ -10,18 +10,19 @@ import java.util.ArrayList;
 public class NeutriedenySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
     private int ciastocnePrazdnyBlok;
-    private final int pocetZaznamov;
     private Blok<T> aktualnyBlok;
     private final File subor;
     private final Class<T> typZaznamu;
+    private final int velkostClustera;
 
-    public NeutriedenySubor(String nazovSuboru, Class<T> typZaznamu, int blokovaciFaktor) {
-        this.pocetZaznamov = blokovaciFaktor;
+    public NeutriedenySubor(String nazovSuboru, Class<T> typZaznamu, int velkostClustera) {
+
         this.subor = new File(nazovSuboru);
         this.uplnePrazdnyBlok = -1;
         this.ciastocnePrazdnyBlok = -1;
         this.typZaznamu = typZaznamu;
-        this.aktualnyBlok = new Blok<>(pocetZaznamov, typZaznamu);
+        this.aktualnyBlok = new Blok<>(velkostClustera, typZaznamu);
+        this.velkostClustera = velkostClustera;
     }
 
     public int vlozZaznam(IZaznam<T> zaznam) {
@@ -38,13 +39,19 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             adresabloku = najdiAdresuPrazdnehoBloku();
         }
 
-        if (aktualnyBlok.getPocetValidnychZaznamov() == pocetZaznamov) {
-            aktualnyBlok.vyprazdniBlok();
+        if (aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
+            Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
+            int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
+            aktualnyBlok.setDalsiBlok(novaAdresaBloku);
+            novyBlok.setPredchadzajuciBlok(adresabloku);
+            zapisBlok(aktualnyBlok, adresabloku);
+            aktualnyBlok = novyBlok;
+            adresabloku = novaAdresaBloku;
         }
 
         aktualnyBlok.vlozZaznam(zaznam);
 
-        if (aktualnyBlok.getPocetValidnychZaznamov() == pocetZaznamov) {
+        if (aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
             ciastocnePrazdnyBlok = -1;
         } else {
             ciastocnePrazdnyBlok = adresabloku;
@@ -90,7 +97,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
 
     private void orezSuborSPrazdnymBlokomNaKonci(int blokIndex) {
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-
+            // nemozem takto orezavat
             while (blokIndex >= 0) {
                 raf.seek((long) blokIndex * aktualnyBlok.getSize());
                 byte[] blokBytes = new byte[aktualnyBlok.getSize()];
@@ -100,6 +107,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
                 if (aktualnyBlok.getPocetValidnychZaznamov() > 0) {
                     break;
                 }
+                opravPrepojenie();
 
                 blokIndex--;
             }
@@ -110,13 +118,30 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         }
     }
 
+    private void opravPrepojenie() {
+        Blok<T> predchadzajuciBlok = citajBlok(aktualnyBlok.getPredchadzajuciBlok());
+        Blok<T> dalsiBlok = citajBlok(aktualnyBlok.getDalsiBlok());
+        if (predchadzajuciBlok != null) {
+            predchadzajuciBlok.setDalsiBlok(aktualnyBlok.getDalsiBlok());
+            this.ciastocnePrazdnyBlok = aktualnyBlok.getPredchadzajuciBlok();
+            zapisBlok(predchadzajuciBlok, aktualnyBlok.getPredchadzajuciBlok());
+            aktualnyBlok.setPredchadzajuciBlok(-1);
+        }
+        if (dalsiBlok != null) {
+            dalsiBlok.setPredchadzajuciBlok(aktualnyBlok.getPredchadzajuciBlok());
+            zapisBlok(dalsiBlok, aktualnyBlok.getDalsiBlok());
+            aktualnyBlok.setDalsiBlok(-1);
+        }
+        //TODO ako nastaviť uplnePrazdnyBlok?
+    }
+
     public void vypisObsah() {
         ArrayList<Blok<T>> bloky = new ArrayList<>();
         try (RandomAccessFile raf = new RandomAccessFile(subor, "r")) {
             while (raf.getFilePointer() < raf.length()) {
                 byte[] blokBytes = new byte[aktualnyBlok.getSize()];
                 raf.read(blokBytes);
-                Blok<T> blok = new Blok<>(pocetZaznamov, typZaznamu);
+                Blok<T> blok = new Blok<>(velkostClustera, typZaznamu);
                 blok.fromByteArray(blokBytes);
                 bloky.add(blok);
             }
@@ -136,6 +161,9 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     }
 
     private Blok<T> citajBlok(int index) {
+        if (index == -1) {
+            return null;
+        }
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
             raf.seek((long) index * aktualnyBlok.getSize());
             byte[] blokBytes = new byte[aktualnyBlok.getSize()];
@@ -158,8 +186,17 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
 
     public void ulozAktualnyBlok() {
         if (aktualnyBlok != null) {
-            int indexBloku = najdiAdresuPrazdnehoBloku();
-            zapisBlok(aktualnyBlok, indexBloku);
+            ulozHlavicku();
         }
+    }
+
+    private void ulozHlavicku() {
+        try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
+            raf.seek(0);
+            raf.write(aktualnyBlok.toByteArrayHlavicka());
+        } catch (IOException e) {
+            throw new IllegalStateException("Chyba pri zápise hlavičky do súboru.", e);
+        }
+
     }
 }

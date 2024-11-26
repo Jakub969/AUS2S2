@@ -15,16 +15,19 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
     private int pocetValidnychZaznamov;
     private final IZaznam<T>[] zaznamy;
     private final int maxPocetZaznamov;
-    private int dalsiVolnyIndex;
-    private int predchadzajuciVolnyIndex;
+    private int dalsiBlok;
+    private int predchadzajuciBlok;
     private final Class<T> typZaznamu;
 
-    public Blok(int blokovaciFaktor, Class<T> typZaznamu) {
-        this.zaznamy = (IZaznam<T>[]) new IZaznam[blokovaciFaktor];
+    public Blok(int velkostClustera, Class<T> typZaznamu) {
+        //odpocitavam 3*Integer.BYTES, pretože mám 3 atributy typu int (poceValidnychZaznamov, dalsiVolnyIndex, predchadzajuciVolnyIndex)
         this.typZaznamu = typZaznamu;
+        int velkostZaznamu = getVelkostZaznamu();
+        int blokovaciFaktor = (velkostClustera - 3 * Integer.BYTES) / velkostZaznamu;
+        this.zaznamy = (IZaznam<T>[]) new IZaznam[blokovaciFaktor];
         this.maxPocetZaznamov = blokovaciFaktor;
-        this.dalsiVolnyIndex = -1;
-        this.predchadzajuciVolnyIndex = -1;
+        this.dalsiBlok = -1;
+        this.predchadzajuciBlok = -1;
         this.pocetValidnychZaznamov = 0;
     }
 
@@ -36,8 +39,8 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
 
         try {
             this.pocetValidnychZaznamov = hlpInStream.readInt();
-            this.dalsiVolnyIndex = hlpInStream.readInt();
-            this.predchadzajuciVolnyIndex = hlpInStream.readInt();
+            this.dalsiBlok = hlpInStream.readInt();
+            this.predchadzajuciBlok = hlpInStream.readInt();
             int velkostZaznamu = getVelkostZaznamu();
             for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 byte[] zaznamBytes = new byte[velkostZaznamu];
@@ -56,8 +59,8 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
     public void vyprazdniBlok() {
         Arrays.fill(this.zaznamy, null);
         this.pocetValidnychZaznamov = 0;
-        this.dalsiVolnyIndex = -1;
-        this.predchadzajuciVolnyIndex = -1;
+        this.dalsiBlok = -1;
+        this.predchadzajuciBlok = -1;
     }
 
     @Override
@@ -67,8 +70,8 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
 
         try {
             hlpOutStream.writeInt(this.pocetValidnychZaznamov);
-            hlpOutStream.writeInt(this.dalsiVolnyIndex);
-            hlpOutStream.writeInt(this.predchadzajuciVolnyIndex);
+            hlpOutStream.writeInt(this.dalsiBlok);
+            hlpOutStream.writeInt(this.predchadzajuciBlok);
             for (int i = 0; i < this.pocetValidnychZaznamov; i++) {
                 IZaznam<T> z = zaznamy[i];
                 byte[] zaznamBytes = z.toByteArray();
@@ -79,6 +82,20 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
 
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri konverzii z byte array.");
+        }
+    }
+
+    public byte[] toByteArrayHlavicka() {
+        ByteArrayOutputStream hlpByteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream hlpOutStream = new DataOutputStream(hlpByteArrayOutputStream);
+
+        try {
+            hlpOutStream.writeInt(this.pocetValidnychZaznamov);
+            hlpOutStream.writeInt(this.dalsiBlok);
+            hlpOutStream.writeInt(this.predchadzajuciBlok);
+            return hlpByteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -111,11 +128,6 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
         if (pocetValidnychZaznamov < maxPocetZaznamov) {
             zaznamy[pocetValidnychZaznamov] = zaznam;
             pocetValidnychZaznamov++;
-            if (pocetValidnychZaznamov == maxPocetZaznamov) {
-                dalsiVolnyIndex = -1;
-            } else {
-                dalsiVolnyIndex = pocetValidnychZaznamov;
-            }
         } else {
             throw new IllegalStateException("US.NeutriedenySubor.Blok je plný.");
         }
@@ -138,15 +150,33 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
             IZaznam<T> zmazanyZaznam = zaznamy[pocetValidnychZaznamov - 1];
             zaznamy[pocetValidnychZaznamov - 1] = null;
             pocetValidnychZaznamov--;
-            predchadzajuciVolnyIndex = dalsiVolnyIndex;
-            dalsiVolnyIndex = pocetValidnychZaznamov;
             return zmazanyZaznam.vytvorKopiu();
         }
         return null;
     }
 
+    public int getMaxPocetZaznamov() {
+        return maxPocetZaznamov;
+    }
+
     public int getPocetValidnychZaznamov() {
         return pocetValidnychZaznamov;
+    }
+
+    public void setDalsiBlok(int dalsiBlok) {
+        this.dalsiBlok = dalsiBlok;
+    }
+
+    public void setPredchadzajuciBlok(int predchadzajuciBlok) {
+        this.predchadzajuciBlok = predchadzajuciBlok;
+    }
+
+    public int getDalsiBlok() {
+        return dalsiBlok;
+    }
+
+    public int getPredchadzajuciBlok() {
+        return predchadzajuciBlok;
     }
 
     public void vypisObsah() {

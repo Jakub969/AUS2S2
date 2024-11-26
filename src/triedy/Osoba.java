@@ -52,6 +52,8 @@ public class Osoba implements IZaznam<Osoba> {
         try {
             byte[] menoBytes = new byte[MAX_VELKSOT_MENA];
             dataInput.readFully(menoBytes);
+            //Potrebne vypočítať dľžku stringu aby sa zbytočne neprečítali prázdne znaky
+            //TODO - zistit dlžku stringu
             this.meno = new String(menoBytes).trim().toCharArray();
 
             byte[] priezviskoBytes = new byte[MAX_VELKOST_PRIEZVISKA];
