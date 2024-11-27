@@ -50,16 +50,19 @@ public class Osoba implements IZaznam<Osoba> {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
+            // Načítanie mena
+            int dlzkaMena = dataInput.readInt();
             byte[] menoBytes = new byte[MAX_VELKSOT_MENA];
             dataInput.readFully(menoBytes);
-            //Potrebne vypočítať dľžku stringu aby sa zbytočne neprečítali prázdne znaky
-            //TODO - zistit dlžku stringu
-            this.meno = new String(menoBytes).trim().toCharArray();
+            this.meno = Arrays.copyOf(new String(menoBytes, 0, dlzkaMena).toCharArray(), MAX_VELKSOT_MENA);
 
+            // Načítanie priezviska
+            int dlzkaPriezviska = dataInput.readInt();
             byte[] priezviskoBytes = new byte[MAX_VELKOST_PRIEZVISKA];
             dataInput.readFully(priezviskoBytes);
-            this.priezvisko = new String(priezviskoBytes).trim().toCharArray();
+            this.priezvisko = Arrays.copyOf(new String(priezviskoBytes, 0, dlzkaPriezviska).toCharArray(), MAX_VELKOST_PRIEZVISKA);
 
+            // Načítanie ID
             this.id = dataInput.readInt();
             return this;
         } catch (IOException e) {
@@ -67,13 +70,27 @@ public class Osoba implements IZaznam<Osoba> {
         }
     }
 
+
     @Override
     public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DataOutputStream dataOutput = new DataOutputStream(out);
         try {
-            dataOutput.write(String.format("%-" + MAX_VELKSOT_MENA + "s", new String(meno)).getBytes());
-            dataOutput.write(String.format("%-" + MAX_VELKOST_PRIEZVISKA + "s", new String(priezvisko)).getBytes());
+            // Zápis mena
+            int dlzkaMena = (int) new String(meno).chars()
+                    .filter(c -> c != '\0')
+                    .count(); //TODO nespravne, opraviť!!!
+            dataOutput.writeInt(dlzkaMena); // Uložiť reálnu dĺžku mena
+            dataOutput.write(new String(meno).getBytes(), 0, MAX_VELKSOT_MENA); // Zapísať pevnú veľkosť
+
+            // Zápis priezviska
+            int dlzkaPriezviska = (int) new String(priezvisko).chars()
+                    .filter(c -> c != '\0')
+                    .count();
+            dataOutput.writeInt(dlzkaPriezviska); // Uložiť reálnu dĺžku priezviska
+            dataOutput.write(new String(priezvisko).getBytes(), 0, MAX_VELKOST_PRIEZVISKA); // Zapísať pevnú veľkosť
+
+            // Zápis ID
             dataOutput.writeInt(id);
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri serializácii záznamu.", e);

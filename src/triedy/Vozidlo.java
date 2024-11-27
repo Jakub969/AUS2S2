@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.Arrays;
 
 public class Vozidlo implements IZaznam<Vozidlo> {
-    private final int MAX_VELKSOT_MENA = 15;
+    private final int MAX_VELKOST_MENA = 15;
     private final int MAX_VELKOST_PRIEZVISKA = 20;
     private final int MAX_VELKOST_ECV = 10;
     private final int MAX_VELKOST_SERVISOV = 5;
@@ -18,8 +18,8 @@ public class Vozidlo implements IZaznam<Vozidlo> {
     private NavstevyServisu[] navstevyServisu;
 
     public Vozidlo(char[] menoZakaznika, char[] priezviskoZakaznika, int idZakaznika, char[] ecv) {
-        if (menoZakaznika.length > MAX_VELKSOT_MENA) {
-            throw new IllegalArgumentException("Meno môže mať maximálne " + MAX_VELKSOT_MENA + " znakov.");
+        if (menoZakaznika.length > MAX_VELKOST_MENA) {
+            throw new IllegalArgumentException("Meno môže mať maximálne " + MAX_VELKOST_MENA + " znakov.");
         }
         this.menoZakaznika = menoZakaznika;
         if (priezviskoZakaznika.length > MAX_VELKOST_PRIEZVISKA) {
@@ -38,7 +38,7 @@ public class Vozidlo implements IZaznam<Vozidlo> {
     }
 
     public Vozidlo() {
-        this.menoZakaznika = new char[MAX_VELKSOT_MENA];
+        this.menoZakaznika = new char[MAX_VELKOST_MENA];
         this.priezviskoZakaznika = new char[MAX_VELKOST_PRIEZVISKA];
         this.idZakaznika = 0;
         this.ecv = new char[MAX_VELKOST_ECV];
@@ -71,7 +71,7 @@ public class Vozidlo implements IZaznam<Vozidlo> {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
-            byte[] menoBytes = new byte[MAX_VELKSOT_MENA];
+            byte[] menoBytes = new byte[MAX_VELKOST_MENA];
             dataInput.readFully(menoBytes);
             this.menoZakaznika = new String(menoBytes).trim().toCharArray();
 
@@ -103,7 +103,7 @@ public class Vozidlo implements IZaznam<Vozidlo> {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DataOutputStream dataOutput = new DataOutputStream(out);
         try {
-            dataOutput.write(String.format("%-" + MAX_VELKSOT_MENA + "s", new String(menoZakaznika)).getBytes());
+            dataOutput.write(String.format("%-" + MAX_VELKOST_MENA + "s", new String(menoZakaznika)).getBytes());
             dataOutput.write(String.format("%-" + MAX_VELKOST_PRIEZVISKA + "s", new String(priezviskoZakaznika)).getBytes());
             dataOutput.writeInt(idZakaznika);
             dataOutput.write(String.format("%-" + MAX_VELKOST_ECV + "s", new String(ecv)).getBytes());
@@ -119,6 +119,6 @@ public class Vozidlo implements IZaznam<Vozidlo> {
 
     @Override
     public int getSize() {
-        return MAX_VELKSOT_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + MAX_VELKOST_ECV;// + MAX_VELKOST_SERVISOV * new NavstevyServisu().getSize();
+        return MAX_VELKOST_MENA + MAX_VELKOST_PRIEZVISKA + Integer.BYTES + MAX_VELKOST_ECV;// + MAX_VELKOST_SERVISOV * new NavstevyServisu().getSize();
     }
 }
