@@ -37,6 +37,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             aktualnyBlok = citajBlok(adresabloku);
         } else {
             adresabloku = najdiAdresuPrazdnehoBloku();
+            ciastocnePrazdnyBlok = adresabloku;
         }
 
         if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
@@ -49,15 +50,17 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             adresabloku = novaAdresaBloku;
         }
 
-        aktualnyBlok.vlozZaznam(zaznam);
-
-        if (aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
-            ciastocnePrazdnyBlok = -1;
-        } else {
-            ciastocnePrazdnyBlok = adresabloku;
+        if (aktualnyBlok != null) {
+            aktualnyBlok.vlozZaznam(zaznam);
         }
 
-        zapisBlok(aktualnyBlok, adresabloku);
+        if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
+            ciastocnePrazdnyBlok = -1;
+        }
+
+        if (aktualnyBlok != null) {
+            zapisBlok(aktualnyBlok, adresabloku);
+        }
         return adresabloku;
     }
 
@@ -75,29 +78,33 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
 
     public T getZaznam(T zaznam, int blok) {
         Blok<T> najdenyBlok = citajBlok(blok);
-        return najdenyBlok.getZaznam(zaznam);
+        if (najdenyBlok != null) {
+            return najdenyBlok.getZaznam(zaznam);
+        }
+        return null;
     }
 
     public T zmazZaznam(T zaznam, int blok) {
         Blok<T> najdenyBlok = citajBlok(blok);
-        T zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
-        zapisBlok(najdenyBlok, blok);
+        T zmazanyZaznam = null;
+        if (najdenyBlok != null) {
+            zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
+        }
+        if (najdenyBlok != null) {
+            zapisBlok(najdenyBlok, blok);
+        }
         int dlzkaSuboru = (int) subor.length();
         int dlzkaBloku = aktualnyBlok.getSize();
         int poslednyBlokIndex = (dlzkaSuboru / dlzkaBloku) - 1;
-        if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
+        if (najdenyBlok != null && najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
             orezSuborSPrazdnymBlokomNaKonci(blok);
-        } else if (najdenyBlok.getPocetValidnychZaznamov() == 0 && blok != poslednyBlokIndex) {
-            uplnePrazdnyBlok = blok;
-        } else {
-            ciastocnePrazdnyBlok = blok;
         }
         return zmazanyZaznam;
     }
 
     private void orezSuborSPrazdnymBlokomNaKonci(int blokIndex) {
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-            // nemozem takto orezavat
+
             while (blokIndex >= 0) {
                 raf.seek((long) blokIndex * aktualnyBlok.getSize());
                 byte[] blokBytes = new byte[aktualnyBlok.getSize()];

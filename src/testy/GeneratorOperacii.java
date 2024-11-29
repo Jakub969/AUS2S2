@@ -21,11 +21,14 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     private int pocetMazani;
     private int pocetVyhladavani;
     private long seed;
+    private final String[] MENA = {"Jozef", "Peter", "Marek", "Martin", "Michal", "Tomas", "Lukas", "Jakub", "Adam", "Filip"};
+    private final String[] PRIEZVISKA = {"Roxer", "Solar", "Novy", "Kral", "Kralik", "Kralovic", "Kralovsky", "Molnar", "Kralov"};
+    private final String[] ECV = {"SN467VH", "GL157LP", "BA123AB", "KE456CD", "PO789EF", "TT101HN", "BB202FB", "PP303ND", "KK404NS", "LL505ES"};
 
     public GeneratorOperacii(NeutriedenySubor<T> neutriedenySubor, int pocetOperacii) {
         this.neutriedenySubor = neutriedenySubor;
         this.pocetOperacii = pocetOperacii;
-        this.seed = 20189429432000L;
+        this.seed = 28786858154200L;
         this.random = new Random(seed);
         this.bloky = new HashMap<>();
         this.adresyBlokov = new ArrayList<>();
@@ -73,20 +76,12 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     }
 
     private IZaznam<T> vytvorZaznam() {
-        char[] meno = vygenerujPoleznakov(8);
-        char[] priezvisko = vygenerujPoleznakov(10);
-        char[] ecv = vygenerujPoleznakov(7);
+        char[] meno = MENA[random.nextInt(MENA.length)].toCharArray();
+        char[] priezvisko = PRIEZVISKA[random.nextInt(PRIEZVISKA.length)].toCharArray();
+        char[] ecv = ECV[random.nextInt(ECV.length)].toCharArray();
         Vozidlo vozidlo = new Vozidlo(meno, priezvisko, id, ecv);
         id++;
         return (IZaznam<T>) vozidlo;
-    }
-
-    private char[] vygenerujPoleznakov(int pocetZnakov) {
-        char[] pole = new char[pocetZnakov];
-        for (int i = 0; i < pocetZnakov; i++) {
-            pole[i] = (char) (random.nextInt(26) + 'a');
-        }
-        return pole;
     }
 
     private void metodaVkladania() {

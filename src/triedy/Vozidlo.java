@@ -12,12 +12,12 @@ public class Vozidlo implements IZaznam<Vozidlo> {
     private final int MAX_VELKOST_SERVISOV = 5;
 
     private char[] menoZakaznika;
-    private final int skutocnaDlzkaMena;
+    private int skutocnaDlzkaMena;
     private char[] priezviskoZakaznika;
-    private final int skutocnaDlzkaPriezviska;
+    private int skutocnaDlzkaPriezviska;
     private int idZakaznika;
     private char[] ecv;
-    private final int skutocnaDlzkaEcv;
+    private int skutocnaDlzkaEcv;
     private NavstevyServisu[] navstevyServisu;
 
     public Vozidlo(char[] menoZakaznika, char[] priezviskoZakaznika, int idZakaznika, char[] ecv) {
@@ -60,12 +60,9 @@ public class Vozidlo implements IZaznam<Vozidlo> {
     @Override
     public String toString() {
         return "Vozidlo{" +
-                "skutocnaDlzkaMena=" + skutocnaDlzkaMena +
                 ", menoZakaznika=" + Arrays.toString(menoZakaznika) +
-                ", skutocnaDlzkaPriezviska=" + skutocnaDlzkaPriezviska +
                 ", priezviskoZakaznika=" + Arrays.toString(priezviskoZakaznika) +
                 ", idZakaznika=" + idZakaznika +
-                ", skutocnaDlzkaEcv=" + skutocnaDlzkaEcv +
                 ", ecv=" + Arrays.toString(ecv) +
                 ", navstevyServisu=" + Arrays.toString(navstevyServisu) +
                 '}';
@@ -86,21 +83,21 @@ public class Vozidlo implements IZaznam<Vozidlo> {
         ByteArrayInputStream in = new ByteArrayInputStream(poleBytov);
         DataInputStream dataInput = new DataInputStream(in);
         try {
-            int dlzkaMena = dataInput.readInt();
+            this.skutocnaDlzkaMena = dataInput.readInt();
             byte[] menoBytes = new byte[MAX_VELKOST_MENA];
             dataInput.readFully(menoBytes);
-            this.menoZakaznika = new String(menoBytes, 0, dlzkaMena).toCharArray();
+            this.menoZakaznika = new String(menoBytes, 0, this.skutocnaDlzkaMena).toCharArray();
 
-            int dlzkaPriezviska = dataInput.readInt();
+            this.skutocnaDlzkaPriezviska = dataInput.readInt();
             byte[] priezviskoBytes = new byte[MAX_VELKOST_PRIEZVISKA];
             dataInput.readFully(priezviskoBytes);
-            this.priezviskoZakaznika = new String(priezviskoBytes, 0, dlzkaPriezviska).toCharArray();
+            this.priezviskoZakaznika = new String(priezviskoBytes, 0, this.skutocnaDlzkaPriezviska).toCharArray();
 
             this.idZakaznika = dataInput.readInt();
-            int dlzkaEcv = dataInput.readInt();
+            this.skutocnaDlzkaEcv = dataInput.readInt();
             byte[] ecvBytes = new byte[MAX_VELKOST_ECV];
             dataInput.readFully(ecvBytes);
-            this.ecv = new String(ecvBytes,0,dlzkaEcv).toCharArray();
+            this.ecv = new String(ecvBytes,0,this.skutocnaDlzkaEcv).toCharArray();
 
             /*NavstevyServisu[] navstevyServisu = new NavstevyServisu[MAX_VELKOST_SERVISOV];
             for (int i = 0; i < MAX_VELKOST_SERVISOV; i++) {

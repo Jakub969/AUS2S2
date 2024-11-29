@@ -4,7 +4,7 @@ import triedy.Vozidlo;
 
 public class Main {
     public static void main(String[] args) {
-        NeutriedenySubor vozidlaNeutriedenySubor = new NeutriedenySubor("vozidlo.bin", Vozidlo.class, 4096);
-        GeneratorOperacii generatorOperacii = new GeneratorOperacii(vozidlaNeutriedenySubor, 10);
+        NeutriedenySubor<Vozidlo> vozidlaNeutriedenySubor = new NeutriedenySubor<>("vozidlo.bin", Vozidlo.class, 134);
+        new GeneratorOperacii<>(vozidlaNeutriedenySubor, 100);
     }
 }
