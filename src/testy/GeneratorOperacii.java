@@ -5,6 +5,7 @@ import US.NeutriedenySubor.NeutriedenySubor;
 import rozhrania.IZaznam;
 import triedy.Vozidlo;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -24,11 +25,11 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     public GeneratorOperacii(NeutriedenySubor<T> neutriedenySubor, int pocetOperacii) {
         this.neutriedenySubor = neutriedenySubor;
         this.pocetOperacii = pocetOperacii;
-        this.seed = System.nanoTime();
+        this.seed = 20189429432000L;
         this.random = new Random(seed);
         this.bloky = new HashMap<>();
         this.adresyBlokov = new ArrayList<>();
-        this.id = 0;
+        this.id = 1;
         this.pocetVkladani = 0;
         this.pocetMazani = 0;
         this.pocetVyhladavani = 0;
@@ -36,6 +37,7 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
     }
 
     private void generujOperacie() {
+        zapisSeed();
         for (int i = 0; i < pocetOperacii; i++) {
             if (random.nextInt() < 0.7) {
                 metodaVkladania();
@@ -56,14 +58,24 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
         System.out.println("Počet mazaní: " + pocetMazani);
         System.out.println("Počet vyhľadávaní: " + pocetVyhladavani);
         this.neutriedenySubor.vypisObsah();
+    }
 
-        System.out.println("Seed: " + seed);
+    private void zapisSeed() {
+        File file = new File("seed.txt");
+        try {
+            file.createNewFile();
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(String.valueOf(seed));
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private IZaznam<T> vytvorZaznam() {
-        char[] meno = vygenerujPoleznakov(15);
-        char[] priezvisko = vygenerujPoleznakov(20);
-        char[] ecv = vygenerujPoleznakov(10);
+        char[] meno = vygenerujPoleznakov(8);
+        char[] priezvisko = vygenerujPoleznakov(10);
+        char[] ecv = vygenerujPoleznakov(7);
         Vozidlo vozidlo = new Vozidlo(meno, priezvisko, id, ecv);
         id++;
         return (IZaznam<T>) vozidlo;

@@ -39,7 +39,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             adresabloku = najdiAdresuPrazdnehoBloku();
         }
 
-        if (aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
+        if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
             Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
             int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
             aktualnyBlok.setDalsiBlok(novaAdresaBloku);

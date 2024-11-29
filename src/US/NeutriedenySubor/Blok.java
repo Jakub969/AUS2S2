@@ -77,9 +77,13 @@ public class Blok<T extends IZaznam<T>> implements IByteOperacie<T> {
                 byte[] zaznamBytes = z.toByteArray();
                 hlpOutStream.write(zaznamBytes, 0, zaznamBytes.length);
             }
+            int currentSize = hlpByteArrayOutputStream.size();
+            int totalSize = getSize();
+            if (currentSize < totalSize) {
+                byte[] emptyBytes = new byte[totalSize - currentSize];
+                hlpOutStream.write(emptyBytes);
+            }
             return hlpByteArrayOutputStream.toByteArray();
-
-
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri konverzii z byte array.");
         }

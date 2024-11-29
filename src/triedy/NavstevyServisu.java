@@ -57,9 +57,10 @@ public class NavstevyServisu implements IZaznam<NavstevyServisu> {
             int pocetPopisov = dataInput.readInt();
             this.popis = new char[pocetPopisov][];
             for (int i = 0; i < pocetPopisov; i++) {
+                int dlzkaPopisu = dataInput.readInt();
                 byte[] popisBytes = new byte[MAX_VELKOST_POPISU];
                 dataInput.readFully(popisBytes);
-                this.popis[i] = new String(popisBytes).trim().toCharArray();
+                this.popis[i] = new String(popisBytes, 0, dlzkaPopisu).toCharArray();
             }
             this.id_servisu = dataInput.readInt();
             return this;
@@ -77,6 +78,8 @@ public class NavstevyServisu implements IZaznam<NavstevyServisu> {
             hlpOutStream.writeDouble(this.cena);
             hlpOutStream.writeInt(this.popis.length);
             for (char[] riadok : this.popis) {
+                int dlzkaPopisu = riadok.length;
+                hlpOutStream.writeInt(dlzkaPopisu);
                 byte[] popisBytes = new String(riadok).getBytes();
                 hlpOutStream.write(popisBytes, 0, popisBytes.length);
             }
