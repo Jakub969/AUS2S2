@@ -56,6 +56,8 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
                     this.neutriedenySubor.vypisObsah();
                 }
             }
+            System.out.println("Pomocná štruktúra: -------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            vypisBlokyVPomocnejStrukture();
         }
         System.out.println("Počet vkladaní: " + pocetVkladani);
         System.out.println("Počet mazaní: " + pocetMazani);
@@ -122,5 +124,20 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
         neutriedenySubor.getZaznam((T) zaznam, adresa);
         System.out.println("Nájdený záznam: " + zaznam + " v bloku: " + adresa);
         pocetVyhladavani++;
+    }
+
+    private void vypisBlokyVPomocnejStrukture() {
+        for (int adresa : adresyBlokov) {
+            if (bloky.get(adresa).isEmpty()) {
+                System.out.println("Blok " + adresa + " je prázdny.");
+            } else {
+                System.out.println("Blok " + adresa + ":");
+            }
+            for (IZaznam<T> z : bloky.get(adresa)) {
+                if (z != null) {
+                    System.out.println(z);
+                }
+            }
+        }
     }
 }

@@ -31,6 +31,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         if (uplnePrazdnyBlok != -1) {
             adresabloku = uplnePrazdnyBlok;
             aktualnyBlok = citajBlok(adresabloku);
+            ciastocnePrazdnyBlok = uplnePrazdnyBlok;
             uplnePrazdnyBlok = -1;
         } else if (ciastocnePrazdnyBlok != -1) {
             adresabloku = ciastocnePrazdnyBlok;
@@ -56,6 +57,14 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
 
         if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
             ciastocnePrazdnyBlok = -1;
+            Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
+            int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
+            aktualnyBlok.setDalsiBlok(novaAdresaBloku);
+            novyBlok.setPredchadzajuciBlok(adresabloku);
+            zapisBlok(aktualnyBlok, adresabloku);
+            aktualnyBlok = novyBlok;
+            uplnePrazdnyBlok = novaAdresaBloku;
+            return adresabloku;
         }
 
         if (aktualnyBlok != null) {
@@ -80,7 +89,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         Blok<T> najdenyBlok = citajBlok(blok);
         if (najdenyBlok != null) {
             T zaznamZBloku = najdenyBlok.getZaznam(zaznam);
-            najdenyBlok.vyprazdniBlok();
+            aktualnyBlok.vyprazdniBlok();
             return zaznamZBloku;
         }
         return null;
@@ -100,6 +109,12 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         int poslednyBlokIndex = (dlzkaSuboru / dlzkaBloku) - 1;
         if (najdenyBlok != null && najdenyBlok.getPocetValidnychZaznamov() == 0 && blok == poslednyBlokIndex) {
             orezSuborSPrazdnymBlokomNaKonci(blok);
+        } else if (najdenyBlok != null && najdenyBlok.getPocetValidnychZaznamov() == 0) {
+            if (uplnePrazdnyBlok == -1) {
+                uplnePrazdnyBlok = blok;
+            }
+        } else if (najdenyBlok != null && najdenyBlok.getPocetValidnychZaznamov() > 0) {
+            ciastocnePrazdnyBlok = blok;
         }
         return zmazanyZaznam;
     }

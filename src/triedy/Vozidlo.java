@@ -60,7 +60,7 @@ public class Vozidlo implements IZaznam<Vozidlo> {
     @Override
     public String toString() {
         return "Vozidlo{" +
-                ", menoZakaznika=" + Arrays.toString(menoZakaznika) +
+                "menoZakaznika=" + Arrays.toString(menoZakaznika) +
                 ", priezviskoZakaznika=" + Arrays.toString(priezviskoZakaznika) +
                 ", idZakaznika=" + idZakaznika +
                 ", ecv=" + Arrays.toString(ecv) +
