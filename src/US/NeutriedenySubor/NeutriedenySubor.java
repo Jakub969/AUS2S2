@@ -79,7 +79,9 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     public T getZaznam(T zaznam, int blok) {
         Blok<T> najdenyBlok = citajBlok(blok);
         if (najdenyBlok != null) {
-            return najdenyBlok.getZaznam(zaznam);
+            T zaznamZBloku = najdenyBlok.getZaznam(zaznam);
+            najdenyBlok.vyprazdniBlok();
+            return zaznamZBloku;
         }
         return null;
     }
@@ -91,7 +93,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             zmazanyZaznam = najdenyBlok.zmazZaznam(zaznam);
         }
         if (najdenyBlok != null) {
-            zapisBlok(najdenyBlok, blok);
+            ulozHlavicku(najdenyBlok, blok);
         }
         int dlzkaSuboru = (int) subor.length();
         int dlzkaBloku = aktualnyBlok.getSize();
@@ -131,12 +133,12 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         if (predchadzajuciBlok != null) {
             predchadzajuciBlok.setDalsiBlok(aktualnyBlok.getDalsiBlok());
             this.ciastocnePrazdnyBlok = aktualnyBlok.getPredchadzajuciBlok();
-            zapisBlok(predchadzajuciBlok, aktualnyBlok.getPredchadzajuciBlok());
+            ulozHlavicku(predchadzajuciBlok, aktualnyBlok.getPredchadzajuciBlok());
             aktualnyBlok.setPredchadzajuciBlok(-1);
         }
         if (dalsiBlok != null) {
             dalsiBlok.setPredchadzajuciBlok(aktualnyBlok.getPredchadzajuciBlok());
-            zapisBlok(dalsiBlok, aktualnyBlok.getDalsiBlok());
+            ulozHlavicku(dalsiBlok, aktualnyBlok.getDalsiBlok());
             aktualnyBlok.setDalsiBlok(-1);
         }
         //TODO ako nastaviť uplnePrazdnyBlok?
@@ -191,16 +193,16 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         }
     }
 
-    public void ulozAktualnyBlok() {
+    public void ulozAktualnyBlok(int index) {
         if (aktualnyBlok != null) {
-            ulozHlavicku();
+            ulozHlavicku(aktualnyBlok, index);
         }
     }
 
-    private void ulozHlavicku() {
+    private void ulozHlavicku(Blok<T> blok, int index) {
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-            raf.seek(0);
-            raf.write(aktualnyBlok.toByteArrayHlavicka());
+            raf.seek((long) index * blok.getSize());
+            raf.write(blok.toByteArrayHlavicka());
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri zápise hlavičky do súboru.", e);
         }
