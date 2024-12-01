@@ -59,6 +59,7 @@ public class GeneratorOperacii<T extends IZaznam<T>> {
             System.out.println("Pomocná štruktúra: -------------------------------------------------------------------------------------------------------------------------------------------------------------");
             vypisBlokyVPomocnejStrukture();
         }
+        this.neutriedenySubor.ulozAktualnyBlok();
         System.out.println("Počet vkladaní: " + pocetVkladani);
         System.out.println("Počet mazaní: " + pocetMazani);
         System.out.println("Počet vyhľadávaní: " + pocetVyhladavani);

@@ -11,6 +11,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     private int uplnePrazdnyBlok;
     private int ciastocnePrazdnyBlok;
     private Blok<T> aktualnyBlok;
+    private int poslednyIndexBloku;
     private final File subor;
     private final Class<T> typZaznamu;
     private final int velkostClustera;
@@ -20,6 +21,7 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         this.subor = new File(nazovSuboru);
         this.uplnePrazdnyBlok = -1;
         this.ciastocnePrazdnyBlok = -1;
+        this.poslednyIndexBloku = 0;
         this.typZaznamu = typZaznamu;
         this.aktualnyBlok = new Blok<>(velkostClustera, typZaznamu);
         this.velkostClustera = velkostClustera;
@@ -28,14 +30,14 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     public int vlozZaznam(IZaznam<T> zaznam) {
         int adresabloku;
 
-        if (uplnePrazdnyBlok != -1) {
+        if (ciastocnePrazdnyBlok != -1) {
+            adresabloku = ciastocnePrazdnyBlok;
+            aktualnyBlok = citajBlok(adresabloku);
+        } else if (uplnePrazdnyBlok != -1) {
             adresabloku = uplnePrazdnyBlok;
             aktualnyBlok = citajBlok(adresabloku);
             ciastocnePrazdnyBlok = uplnePrazdnyBlok;
             uplnePrazdnyBlok = -1;
-        } else if (ciastocnePrazdnyBlok != -1) {
-            adresabloku = ciastocnePrazdnyBlok;
-            aktualnyBlok = citajBlok(adresabloku);
         } else {
             adresabloku = najdiAdresuPrazdnehoBloku();
             ciastocnePrazdnyBlok = adresabloku;
@@ -64,6 +66,8 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             zapisBlok(aktualnyBlok, adresabloku);
             aktualnyBlok = novyBlok;
             uplnePrazdnyBlok = novaAdresaBloku;
+            //poslednyIndexBloku = adresabloku;
+            //TODO ako spravne ulozit hlavičku bloku, ktorý je ešte v ramke?
             return adresabloku;
         }
 
@@ -74,11 +78,11 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     }
 
     private int najdiAdresuPrazdnehoBloku() {
-        if (uplnePrazdnyBlok != -1) {
-            return uplnePrazdnyBlok;
-        }
         if (ciastocnePrazdnyBlok != -1) {
             return ciastocnePrazdnyBlok;
+        }
+        if (uplnePrazdnyBlok != -1) {
+            return uplnePrazdnyBlok;
         }
         int dlzkaSuboru = (int) subor.length();
         int dlzkaBloku = aktualnyBlok.getSize();
@@ -137,6 +141,12 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             }
 
             raf.setLength((long) (blokIndex + 1) * aktualnyBlok.getSize());
+            if (subor.length() == 0) {
+                uplnePrazdnyBlok = -1;
+                ciastocnePrazdnyBlok = -1;
+                this.aktualnyBlok.setDalsiBlok(-1);
+                this.aktualnyBlok.setPredchadzajuciBlok(-1);
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri orezávaní súboru.", e);
         }
@@ -147,7 +157,6 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         Blok<T> dalsiBlok = citajBlok(aktualnyBlok.getDalsiBlok());
         if (predchadzajuciBlok != null) {
             predchadzajuciBlok.setDalsiBlok(aktualnyBlok.getDalsiBlok());
-            this.ciastocnePrazdnyBlok = aktualnyBlok.getPredchadzajuciBlok();
             ulozHlavicku(predchadzajuciBlok, aktualnyBlok.getPredchadzajuciBlok());
             aktualnyBlok.setPredchadzajuciBlok(-1);
         }
@@ -208,9 +217,9 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
         }
     }
 
-    public void ulozAktualnyBlok(int index) {
+    public void ulozAktualnyBlok() {
         if (aktualnyBlok != null) {
-            ulozHlavicku(aktualnyBlok, index);
+            ulozHlavicku(aktualnyBlok, poslednyIndexBloku);
         }
     }
 
