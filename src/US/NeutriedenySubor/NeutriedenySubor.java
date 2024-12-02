@@ -43,32 +43,29 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
             ciastocnePrazdnyBlok = adresabloku;
         }
 
-        if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
-            Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
-            int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
-            aktualnyBlok.setDalsiBlok(novaAdresaBloku);
-            novyBlok.setPredchadzajuciBlok(adresabloku);
-            zapisBlok(aktualnyBlok, adresabloku);
-            aktualnyBlok = novyBlok;
-            adresabloku = novaAdresaBloku;
-        }
-
         if (aktualnyBlok != null) {
             aktualnyBlok.vlozZaznam(zaznam);
         }
 
         if (aktualnyBlok != null && aktualnyBlok.getPocetValidnychZaznamov() == aktualnyBlok.getMaxPocetZaznamov()) {
-            ciastocnePrazdnyBlok = -1;
-            Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
-            int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
-            aktualnyBlok.setDalsiBlok(novaAdresaBloku);
-            novyBlok.setPredchadzajuciBlok(adresabloku);
-            zapisBlok(aktualnyBlok, adresabloku);
-            aktualnyBlok = novyBlok;
-            uplnePrazdnyBlok = novaAdresaBloku;
-            //poslednyIndexBloku = adresabloku;
-            //TODO ako spravne ulozit hlavičku bloku, ktorý je ešte v ramke?
-            return adresabloku;
+            if (aktualnyBlok.getDalsiBlok() >= 0) {
+                Blok<T> novyBlok = citajBlok(aktualnyBlok.getDalsiBlok());
+                zapisBlok(aktualnyBlok, adresabloku);
+                aktualnyBlok = novyBlok;
+                return adresabloku;
+            } else {
+                ciastocnePrazdnyBlok = -1;
+                Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
+                int novaAdresaBloku = najdiAdresuPrazdnehoBloku();
+                aktualnyBlok.setDalsiBlok(novaAdresaBloku);
+                novyBlok.setPredchadzajuciBlok(adresabloku);
+                zapisBlok(aktualnyBlok, adresabloku);
+                aktualnyBlok = novyBlok;
+                uplnePrazdnyBlok = novaAdresaBloku;
+                //poslednyIndexBloku = adresabloku;
+                //TODO ako spravne ulozit hlavičku bloku, ktorý je ešte v ramke?
+                return adresabloku;
+            }
         }
 
         if (aktualnyBlok != null) {
@@ -194,18 +191,19 @@ public class NeutriedenySubor<T extends IZaznam<T>> {
     }
 
     private Blok<T> citajBlok(int index) {
+        Blok<T> novyBlok = new Blok<>(velkostClustera, typZaznamu);
         if (index == -1) {
             return null;
         }
         try (RandomAccessFile raf = new RandomAccessFile(subor, "rw")) {
-            raf.seek((long) index * aktualnyBlok.getSize());
-            byte[] blokBytes = new byte[aktualnyBlok.getSize()];
+            raf.seek((long) index * novyBlok.getSize());
+            byte[] blokBytes = new byte[novyBlok.getSize()];
             raf.read(blokBytes);
-            aktualnyBlok.fromByteArray(blokBytes);
+            novyBlok.fromByteArray(blokBytes);
         } catch (IOException e) {
             throw new IllegalStateException("Chyba pri čítaní bloku zo súboru.", e);
         }
-        return aktualnyBlok;
+        return novyBlok;
     }
 
     private void zapisBlok(Blok<T> blok, int index) {

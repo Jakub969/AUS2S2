@@ -9,7 +9,7 @@ public class NavstevyServisu implements IZaznam<NavstevyServisu> {
     private final int MAX_VELKOST_POPISU = 20;
     private final int MAX_POCET_POPISOV = 10;
 
-    private Date datum;
+    private Date datum; //da sa to previest na long
     private double cena;
     private char[][] popis;
     private int id_servisu;
